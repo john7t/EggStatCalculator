@@ -13,9 +13,7 @@
       background: #f7f7f7;
     }
 
-    h1 {
-      text-align: center;
-    }
+    h1 { text-align: center; }
 
     .card {
       background: white;
@@ -66,16 +64,12 @@
       color: white;
     }
 
-    .error-btn {
-      padding: 6px 8px;
-      font-size: 12px;
+    .copy-btn {
+      width: 34px;
+      height: 30px;
+      font-size: 18px;
       background: #ff9800;
       color: white;
-    }
-
-    .error-btn:disabled {
-      background: #aaa;
-      cursor: not-allowed;
     }
 
     .result {
@@ -94,19 +88,34 @@
       border-collapse: collapse;
       background: white;
       font-size: 14px;
-      min-width: 680px;
+      min-width: 560px;
     }
 
     th, td {
-      padding: 8px;
+      padding: 8px 6px;
       border-bottom: 1px solid #ddd;
       text-align: center;
       white-space: nowrap;
     }
 
+    th:first-child,
+    td:first-child {
+      width: 74px;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
     .top3 {
       background: #fff3a3;
       font-weight: bold;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+      text-align: center;
     }
   </style>
 </head>
@@ -149,7 +158,7 @@
             <th>攻擊</th>
             <th>防禦</th>
             <th>速度</th>
-            <th>錯誤回報</th>
+            <th>提交計算錯誤</th>
           </tr>
         </thead>
         <tbody id="history"></tbody>
@@ -157,6 +166,10 @@
     </div>
 
     <button class="danger-btn" onclick="keepTop3Only()">只保留最好的3筆，其他刪除</button>
+
+    <div class="note">
+      提醒：本資料僅存在本機瀏覽器的暫存資料中，並不會傳送資料。
+    </div>
   </div>
 
   <script>
@@ -207,7 +220,6 @@
         (data.spd - base.spd);
 
       let rank = "";
-
       if (diff >= -6) {
         rank = "A";
       } else if (diff === -7) {
@@ -226,8 +238,7 @@
         timeText: getTimeText(),
         ...data,
         diff,
-        resultText,
-        errorReported: false
+        resultText
       });
 
       saveHistory();
@@ -235,37 +246,25 @@
       clearInputs();
     }
 
-    function submitError(id) {
+    function copyRecord(id) {
       const item = historyData.find(x => x.id === id);
-
       if (!item) return;
 
-      const confirmSubmit = confirm(
-        `確認提交計算錯誤？\n\n結果：${item.resultText}\nHP：${item.hp}\nMP：${item.mp}\n攻擊：${item.atk}\n防禦：${item.def}\n速度：${item.spd}`
-      );
+      const url = new URL(window.location.href);
+      url.searchParams.set("hp", item.hp);
+      url.searchParams.set("mp", item.mp);
+      url.searchParams.set("atk", item.atk);
+      url.searchParams.set("def", item.def);
+      url.searchParams.set("spd", item.spd);
+      url.searchParams.set("result", item.resultText);
 
-      if (!confirmSubmit) return;
-
-      item.errorReported = true;
-
-      let errorReports = JSON.parse(localStorage.getItem("errorReports")) || [];
-      errorReports.push({
-        reportTime: new Date().toLocaleString(),
-        ...item
-      });
-
-      localStorage.setItem("errorReports", JSON.stringify(errorReports));
-
-      saveHistory();
-      renderHistory();
-
-      alert("已提交計算錯誤紀錄");
+      navigator.clipboard.writeText(url.toString())
+        .then(() => alert("已複製，可貼給對方"))
+        .catch(() => alert("複製失敗，請手動複製網址"));
     }
 
     function keepTop3Only() {
-      if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) {
-        return;
-      }
+      if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) return;
 
       historyData = [...historyData]
         .sort((a, b) => b.diff - a.diff)
@@ -310,13 +309,7 @@
           <td>${item.def}</td>
           <td>${item.spd}</td>
           <td>
-            <button
-              class="error-btn"
-              onclick="submitError(${item.id})"
-              ${item.errorReported ? "disabled" : ""}
-            >
-              ${item.errorReported ? "已提交" : "提交計算錯誤"}
-            </button>
+            <button class="copy-btn" onclick="copyRecord(${item.id})">📋</button>
           </td>
         `;
 
@@ -324,6 +317,24 @@
       });
     }
 
+    function loadFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+
+      if (!params.has("hp")) return;
+
+      document.getElementById("hp").value = params.get("hp") || "";
+      document.getElementById("mp").value = params.get("mp") || "";
+      document.getElementById("atk").value = params.get("atk") || "";
+      document.getElementById("def").value = params.get("def") || "";
+      document.getElementById("spd").value = params.get("spd") || "";
+
+      const result = params.get("result");
+      if (result) {
+        document.getElementById("result").textContent = result;
+      }
+    }
+
+    loadFromUrl();
     renderHistory();
   </script>
 
