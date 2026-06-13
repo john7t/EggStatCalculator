@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>能力值評級</title>
+  <style>
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .result {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .top3 {
+      background: #fff3a3;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>能力值評級</h1>
+
+  <div class="card">
+    <label>HP</label>
+    <input type="number" id="hp" value="104">
+
+    <label>MP</label>
+    <input type="number" id="mp" value="32">
+
+    <label>攻擊</label>
+    <input type="number" id="atk" value="16">
+
+    <label>防禦</label>
+    <input type="number" id="def" value="13">
+
+    <label>速度</label>
+    <input type="number" id="spd" value="11">
+
+    <button onclick="calculate()">計算</button>
+
+    <div class="result" id="result">尚未計算</div>
+  </div>
+
+  <div class="card">
+    <h2>歷史紀錄</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>結果</th>
+          <th>HP</th>
+          <th>MP</th>
+          <th>攻擊</th>
+          <th>防禦</th>
+          <th>速度</th>
+        </tr>
+      </thead>
+      <tbody id="history"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const base = {
+      hp: 104,
+      mp: 32,
+      atk: 16,
+      def: 13,
+      spd: 11
+    };
+
+    let historyData = JSON.parse(localStorage.getItem("historyData")) || [];
+
+    function calculate() {
+      const data = {
+        hp: Number(document.getElementById("hp").value),
+        mp: Number(document.getElementById("mp").value),
+        atk: Number(document.getElementById("atk").value),
+        def: Number(document.getElementById("def").value),
+        spd: Number(document.getElementById("spd").value)
+      };
+
+      const diff =
+        (data.hp - base.hp) +
+        (data.mp - base.mp) +
+        (data.atk - base.atk) +
+        (data.def - base.def) +
+        (data.spd - base.spd);
+
+      let rank = "";
+
+      if (diff >= -6) {
+        rank = "A";
+      } else if (diff === -7) {
+        rank = "B";
+      } else {
+        rank = "C";
+      }
+
+      const sign = diff >= 0 ? "+" : "";
+      const resultText = `${rank}${sign}${diff}`;
+
+      document.getElementById("result").textContent = resultText;
+
+      historyData.unshift({
+        ...data,
+        diff,
+        resultText
+      });
+
+      localStorage.setItem("historyData", JSON.stringify(historyData));
+
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const tbody = document.getElementById("history");
+      tbody.innerHTML = "";
+
+      const top3 = [...historyData]
+        .sort((a, b) => b.diff - a.diff)
+        .slice(0, 3);
+
+      historyData.forEach(item => {
+        const isTop3 = top3.includes(item);
+
+        const tr = document.createElement("tr");
+        if (isTop3) tr.classList.add("top3");
+
+        tr.innerHTML = `
+          <td>${item.resultText}</td>
+          <td>${item.hp}</td>
+          <td>${item.mp}</td>
+          <td>${item.atk}</td>
+          <td>${item.def}</td>
+          <td>${item.spd}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderHistory();
+  </script>
+
+</body>
+</html>
