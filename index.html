@@ -63,9 +63,9 @@
     }
 
     .inline-field label {
-      margin: 0;
-      width: 52px;
-      flex: 0 0 52px;
+      width: 60px;
+      flex: 0 0 60px;
+      font-weight: bold;
     }
 
     .inline-field input {
@@ -283,20 +283,30 @@
       <input type="text" id="grade" placeholder="可省略">
     </div>
 
-    <label for="hp">HP</label>
-    <input type="number" id="hp" inputmode="numeric">
-
-    <label for="mp">MP</label>
-    <input type="number" id="mp" inputmode="numeric">
-
-    <label for="atk">攻擊</label>
-    <input type="number" id="atk" inputmode="numeric">
-
-    <label for="def">防禦</label>
-    <input type="number" id="def" inputmode="numeric">
-
-    <label for="spd">速度</label>
-    <input type="number" id="spd" inputmode="numeric">
+    <div class="inline-field">
+      <label for="hp">HP</label>
+      <input type="number" id="hp" inputmode="numeric">
+    </div>
+    
+    <div class="inline-field">
+      <label for="mp">MP</label>
+      <input type="number" id="mp" inputmode="numeric">
+    </div>
+    
+    <div class="inline-field">
+      <label for="atk">攻擊</label>
+      <input type="number" id="atk" inputmode="numeric">
+    </div>
+    
+    <div class="inline-field">
+      <label for="def">防禦</label>
+      <input type="number" id="def" inputmode="numeric">
+    </div>
+    
+    <div class="inline-field">
+      <label for="spd">速度</label>
+      <input type="number" id="spd" inputmode="numeric">
+    </div>
 
     <button class="main-btn" onclick="calculate()">計算</button>
 
