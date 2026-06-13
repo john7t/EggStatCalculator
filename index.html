@@ -1,389 +1,190 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>能力值評級</title>
-  <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", sans-serif;
-      padding: 20px;
-      max-width: 620px;
-      margin: auto;
-      background: #f7f7f7;
-    }
-
-    h1 { text-align: center; }
-
-    .card {
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 4px;
-      box-sizing: border-box;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-
-    .main-btn {
-      width: 100%;
-      margin-top: 16px;
-      padding: 12px;
-      font-size: 18px;
-      background: #333;
-      color: white;
-    }
-
-    .danger-btn {
-      width: 100%;
-      margin-top: 16px;
-      padding: 12px;
-      font-size: 16px;
-      background: #b00020;
-      color: white;
-    }
-
-    .copy-btn {
-      width: 34px;
-      height: 30px;
-      font-size: 18px;
-      background: #ff9800;
-      color: white;
-    }
-    .delete-btn {
-      width: 34px;
-      height: 30px;
-      font-size: 16px;
-      background: #d32f2f;
-      color: white;
-    }
-    
-    .action-cell {
-      opacity: 0;
-      transition: 0.2s;
-    }
-    
-    tr:hover .action-cell {
-      opacity: 1;
-    }
-    
-    @media (max-width: 768px) {
-      .action-cell {
-        opacity: 1;
-      }
-    }
-
-    .result {
-      font-size: 28px;
-      font-weight: bold;
-      text-align: center;
-      margin-top: 16px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      font-size: 14px;
-      min-width: 560px;
-    }
-
-    th, td {
-      padding: 8px 6px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    th:first-child,
-    td:first-child {
-      width: 74px;
-      padding-left: 4px;
-      padding-right: 4px;
-    }
-
-    .top3 {
-      background: #fff3a3;
-      font-weight: bold;
-    }
-
-    .note {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #666;
-      line-height: 1.6;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>神獸天賦能力值計算</title>
+<style>
+body{font-family:Arial,"Microsoft JhengHei",sans-serif;padding:20px;max-width:760px;margin:auto;background:#f7f7f7}
+.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:16px}
+h1{text-align:center}
+input{width:100%;padding:10px;margin-top:4px;box-sizing:border-box;border:1px solid #ddd;border-radius:8px}
+label{display:block;margin-top:10px;font-weight:bold}
+.main-btn{width:100%;padding:12px;margin-top:16px;background:#333;color:#fff;border:none;border-radius:8px}
+.result{font-size:28px;font-weight:bold;text-align:center;margin-top:16px}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:8px;text-align:center;border-bottom:1px solid #ddd}
+.top3{background:#fff3a3;font-weight:bold}
+.action-cell{opacity:0;transition:.2s}
+tr:hover .action-cell{opacity:1}
+@media(max-width:768px){.action-cell{opacity:1}}
+.icon-btn{border:none;border-radius:6px;padding:4px 8px;cursor:pointer}
+.copy-btn{background:#ff9800;color:white}
+.del-btn{background:#d32f2f;color:white}
+.actions{display:flex;gap:10px;margin-top:16px}
+.actions button{flex:1;padding:12px;border:none;border-radius:8px;color:white;cursor:pointer}
+.keep{background:#b00020}
+.clear{background:#666}
+.note{margin-top:12px;font-size:13px;color:#666;text-align:center}
+.level-edit{cursor:pointer;color:#1976d2}
+</style>
 </head>
 <body>
 
-  <h1>能力值評級</h1>
+<h1>神獸天賦能力值計算</h1>
 
-  <div class="card">
-    <label>HP</label>
-    <input type="number" id="hp" placeholder="請輸入 HP">
+<div class="card">
+<label>等級</label>
+<input type="text" id="grade" placeholder="可省略">
 
-    <label>MP</label>
-    <input type="number" id="mp" placeholder="請輸入 MP">
+<label>HP</label>
+<input type="number" id="hp">
 
-    <label>攻擊</label>
-    <input type="number" id="atk" placeholder="請輸入攻擊">
+<label>MP</label>
+<input type="number" id="mp">
 
-    <label>防禦</label>
-    <input type="number" id="def" placeholder="請輸入防禦">
+<label>攻擊</label>
+<input type="number" id="atk">
 
-    <label>速度</label>
-    <input type="number" id="spd" placeholder="請輸入速度">
+<label>防禦</label>
+<input type="number" id="def">
 
-    <button class="main-btn" onclick="calculate()">計算</button>
+<label>速度</label>
+<input type="number" id="spd">
 
-    <div class="result" id="result">尚未計算</div>
-  </div>
+<button class="main-btn" onclick="calculate()">計算</button>
 
-  <div class="card">
-    <h2>歷史紀錄</h2>
+<div class="result" id="result">尚未計算</div>
+</div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>時間</th>
-            <th>結果</th>
-            <th>HP</th>
-            <th>MP</th>
-            <th>攻擊</th>
-            <th>防禦</th>
-            <th>速度</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="history"></tbody>
-      </table>
-    </div>
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>時間</th>
+<th>等級</th>
+<th>HP</th>
+<th>MP</th>
+<th>攻擊</th>
+<th>防禦</th>
+<th>速度</th>
+<th>天賦綜合值</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
 
-    <button class="danger-btn" onclick="keepTop3Only()">只保留最好的3筆，其他刪除</button>
+<div class="actions">
+<button class="keep" onclick="keepTop3Only()">保留最好的3筆</button>
+<button class="clear" onclick="clearAllHistory()">全數刪除</button>
+</div>
 
-    <div class="note">
-      提醒：本資料僅存在本機瀏覽器的暫存資料中，並不會傳送資料。
-    </div>
-  </div>
+<div class="note">
+提醒：本資料僅存在本機瀏覽器的暫存資料中，並不會傳送資料。
+</div>
+</div>
 
-  <script>
-    const base = {
-      hp: 104,
-      mp: 32,
-      atk: 16,
-      def: 13,
-      spd: 11
-    };
+<script>
+const base={hp:104,mp:32,atk:16,def:13,spd:11};
+let historyData=JSON.parse(localStorage.getItem("historyData"))||[];
 
-    let historyData = JSON.parse(localStorage.getItem("historyData")) || [];
+function save(){localStorage.setItem("historyData",JSON.stringify(historyData));}
 
-    function getTimeText() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, "0");
-      const hour = String(now.getHours()).padStart(2, "0");
-      const minute = String(now.getMinutes()).padStart(2, "0");
-      const second = String(now.getSeconds()).padStart(2, "0");
-      return `${day} ${hour}:${minute}:${second}`;
-    }
+function calculate(){
+const grade=document.getElementById("grade").value.trim();
+const hp=Number(document.getElementById("hp").value);
+const mp=Number(document.getElementById("mp").value);
+const atk=Number(document.getElementById("atk").value);
+const def=Number(document.getElementById("def").value);
+const spd=Number(document.getElementById("spd").value);
 
-    function calculate() {
-      const data = {
-        hp: Number(document.getElementById("hp").value),
-        mp: Number(document.getElementById("mp").value),
-        atk: Number(document.getElementById("atk").value),
-        def: Number(document.getElementById("def").value),
-        spd: Number(document.getElementById("spd").value)
-      };
+if([hp,mp,atk,def,spd].some(v=>Number.isNaN(v)||v==="")){
+alert("請輸入所有能力值");
+return;
+}
 
-      if (
-        document.getElementById("hp").value === "" ||
-        document.getElementById("mp").value === "" ||
-        document.getElementById("atk").value === "" ||
-        document.getElementById("def").value === "" ||
-        document.getElementById("spd").value === ""
-      ) {
-        alert("請輸入所有數值");
-        return;
-      }
+const diff=(hp-base.hp)+(mp-base.mp)+(atk-base.atk)+(def-base.def)+(spd-base.spd);
+const sign=diff>=0?"+":"";
 
-      const diff =
-        (data.hp - base.hp) +
-        (data.mp - base.mp) +
-        (data.atk - base.atk) +
-        (data.def - base.def) +
-        (data.spd - base.spd);
+historyData.unshift({
+id:Date.now(),
+time:new Date().toLocaleTimeString("zh-TW",{hour12:false}),
+grade,
+hp,mp,atk,def,spd,
+diff
+});
 
-      let rank = "";
-      if (diff >= -6) {
-        rank = "A";
-      } else if (diff === -7) {
-        rank = "B";
-      } else {
-        rank = "C";
-      }
+save();
+render();
 
-      const sign = diff >= 0 ? "+" : "";
-      const resultText = `${rank}${sign}${diff}`;
+document.getElementById("result").textContent="天賦綜合值："+sign+diff;
+["grade","hp","mp","atk","def","spd"].forEach(id=>document.getElementById(id).value="");
+}
 
-      document.getElementById("result").textContent = resultText;
+function render(){
+const tbody=document.getElementById("history");
+tbody.innerHTML="";
 
-      historyData.unshift({
-        id: Date.now(),
-        timeText: getTimeText(),
-        ...data,
-        diff,
-        resultText
-      });
+const top3=[...historyData].sort((a,b)=>b.diff-a.diff).slice(0,3);
 
-      saveHistory();
-      renderHistory();
-      clearInputs();
-    }
+historyData.forEach(item=>{
+const tr=document.createElement("tr");
+if(top3.includes(item)) tr.classList.add("top3");
 
-    function copyRecord(id) {
-      const item = historyData.find(x => x.id === id);
-      if (!item) return;
+const sign=item.diff>=0?"+":"";
 
-      const url = new URL(window.location.href);
-      url.searchParams.set("hp", item.hp);
-      url.searchParams.set("mp", item.mp);
-      url.searchParams.set("atk", item.atk);
-      url.searchParams.set("def", item.def);
-      url.searchParams.set("spd", item.spd);
-      url.searchParams.set("result", item.resultText);
+tr.innerHTML=`
+<td>${item.time}</td>
+<td class="level-edit" onclick="editGrade(${item.id})">${item.grade||"-"}</td>
+<td>${item.hp}</td>
+<td>${item.mp}</td>
+<td>${item.atk}</td>
+<td>${item.def}</td>
+<td>${item.spd}</td>
+<td>${sign}${item.diff}</td>
+<td class="action-cell">
+<button class="icon-btn copy-btn" onclick="copyRecord(${item.id})">📋</button>
+<button class="icon-btn del-btn" onclick="deleteRecord(${item.id})">✕</button>
+</td>`;
+tbody.appendChild(tr);
+});
+}
 
-      navigator.clipboard.writeText(url.toString())
-        .then(() => alert("已複製，可貼給對方"))
-        .catch(() => alert("複製失敗，請手動複製網址"));
-    }
+function editGrade(id){
+const item=historyData.find(x=>x.id===id);
+const value=prompt("請輸入等級",item.grade||"");
+if(value===null)return;
+item.grade=value;
+save();
+render();
+}
 
-    function deleteRecord(id) {
-    if (!confirm("確定刪除這筆紀錄？")) {
-      return;
-    }
-  
-    historyData = historyData.filter(x => x.id !== id);
-  
-    saveHistory();
-    renderHistory();
-  }
+function copyRecord(id){
+const item=historyData.find(x=>x.id===id);
+navigator.clipboard.writeText(JSON.stringify(item));
+alert("已複製");
+}
 
-    function keepTop3Only() {
-      if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) return;
+function deleteRecord(id){
+historyData=historyData.filter(x=>x.id!==id);
+save();render();
+}
 
-      historyData = [...historyData]
-        .sort((a, b) => b.diff - a.diff)
-        .slice(0, 3);
+function keepTop3Only(){
+historyData=[...historyData].sort((a,b)=>b.diff-a.diff).slice(0,3);
+save();render();
+}
 
-      saveHistory();
-      renderHistory();
-    }
+function clearAllHistory(){
+if(confirm("確定刪除全部紀錄？")){
+historyData=[];
+localStorage.removeItem("historyData");
+render();
+}
+}
 
-    function clearInputs() {
-      document.getElementById("hp").value = "";
-      document.getElementById("mp").value = "";
-      document.getElementById("atk").value = "";
-      document.getElementById("def").value = "";
-      document.getElementById("spd").value = "";
-    }
-
-    function saveHistory() {
-      localStorage.setItem("historyData", JSON.stringify(historyData));
-    }
-
-    function renderHistory() {
-      const tbody = document.getElementById("history");
-      tbody.innerHTML = "";
-
-      const top3 = [...historyData]
-        .sort((a, b) => b.diff - a.diff)
-        .slice(0, 3);
-
-      historyData.forEach(item => {
-        const isTop3 = top3.includes(item);
-
-        const tr = document.createElement("tr");
-        if (isTop3) tr.classList.add("top3");
-
-        tr.innerHTML = `
-          <td>${item.timeText || "-"}</td>
-          <td>${item.resultText}</td>
-          <td>${item.hp}</td>
-          <td>${item.mp}</td>
-          <td>${item.atk}</td>
-          <td>${item.def}</td>
-          <td>${item.spd}</td>
-          <td class="action-cell">
-            <button
-              class="copy-btn"
-              onclick="copyRecord(${item.id})"
-              title="複製"
-            >
-              📋
-            </button>
-          
-            <button
-              class="delete-btn"
-              onclick="deleteRecord(${item.id})"
-              title="刪除"
-            >
-              ✕
-            </button>
-          </td>
-        `;
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    function loadFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-
-      if (!params.has("hp")) return;
-
-      document.getElementById("hp").value = params.get("hp") || "";
-      document.getElementById("mp").value = params.get("mp") || "";
-      document.getElementById("atk").value = params.get("atk") || "";
-      document.getElementById("def").value = params.get("def") || "";
-      document.getElementById("spd").value = params.get("spd") || "";
-
-      const result = params.get("result");
-      if (result) {
-        document.getElementById("result").textContent = result;
-      }
-    }
-
-    loadFromUrl();
-    renderHistory();
-  </script>
-
+render();
+</script>
 </body>
 </html>
