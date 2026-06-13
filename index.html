@@ -8,7 +8,7 @@
     body {
       font-family: Arial, "Microsoft JhengHei", sans-serif;
       padding: 20px;
-      max-width: 500px;
+      max-width: 520px;
       margin: auto;
       background: #f7f7f7;
     }
@@ -33,26 +33,29 @@
 
     input {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-top: 4px;
       box-sizing: border-box;
       font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
     }
 
     button {
       width: 100%;
       margin-top: 16px;
-      padding: 10px;
+      padding: 12px;
       font-size: 18px;
       border: none;
       border-radius: 8px;
       background: #333;
       color: white;
       cursor: pointer;
+      font-weight: bold;
     }
 
     .result {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
       text-align: center;
       margin-top: 16px;
@@ -62,6 +65,7 @@
       width: 100%;
       border-collapse: collapse;
       background: white;
+      font-size: 14px;
     }
 
     th, td {
@@ -82,19 +86,19 @@
 
   <div class="card">
     <label>HP</label>
-    <input type="number" id="hp" value="104">
+    <input type="number" id="hp" placeholder="請輸入 HP">
 
     <label>MP</label>
-    <input type="number" id="mp" value="32">
+    <input type="number" id="mp" placeholder="請輸入 MP">
 
     <label>攻擊</label>
-    <input type="number" id="atk" value="16">
+    <input type="number" id="atk" placeholder="請輸入攻擊">
 
     <label>防禦</label>
-    <input type="number" id="def" value="13">
+    <input type="number" id="def" placeholder="請輸入防禦">
 
     <label>速度</label>
-    <input type="number" id="spd" value="11">
+    <input type="number" id="spd" placeholder="請輸入速度">
 
     <button onclick="calculate()">計算</button>
 
@@ -138,6 +142,17 @@
         spd: Number(document.getElementById("spd").value)
       };
 
+      if (
+        document.getElementById("hp").value === "" ||
+        document.getElementById("mp").value === "" ||
+        document.getElementById("atk").value === "" ||
+        document.getElementById("def").value === "" ||
+        document.getElementById("spd").value === ""
+      ) {
+        alert("請輸入所有數值");
+        return;
+      }
+
       const diff =
         (data.hp - base.hp) +
         (data.mp - base.mp) +
@@ -169,6 +184,12 @@
       localStorage.setItem("historyData", JSON.stringify(historyData));
 
       renderHistory();
+
+      document.getElementById("hp").value = "";
+      document.getElementById("mp").value = "";
+      document.getElementById("atk").value = "";
+      document.getElementById("def").value = "";
+      document.getElementById("spd").value = "";
     }
 
     function renderHistory() {
