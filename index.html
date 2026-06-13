@@ -71,6 +71,28 @@
       background: #ff9800;
       color: white;
     }
+    .delete-btn {
+      width: 34px;
+      height: 30px;
+      font-size: 16px;
+      background: #d32f2f;
+      color: white;
+    }
+    
+    .action-cell {
+      opacity: 0;
+      transition: 0.2s;
+    }
+    
+    tr:hover .action-cell {
+      opacity: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .action-cell {
+        opacity: 1;
+      }
+    }
 
     .result {
       font-size: 28px;
@@ -158,7 +180,7 @@
             <th>攻擊</th>
             <th>防禦</th>
             <th>速度</th>
-            <th>提交計算錯誤</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="history"></tbody>
@@ -263,6 +285,17 @@
         .catch(() => alert("複製失敗，請手動複製網址"));
     }
 
+    function deleteRecord(id) {
+    if (!confirm("確定刪除這筆紀錄？")) {
+      return;
+    }
+  
+    historyData = historyData.filter(x => x.id !== id);
+  
+    saveHistory();
+    renderHistory();
+  }
+
     function keepTop3Only() {
       if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) return;
 
@@ -308,8 +341,22 @@
           <td>${item.atk}</td>
           <td>${item.def}</td>
           <td>${item.spd}</td>
-          <td>
-            <button class="copy-btn" onclick="copyRecord(${item.id})">📋</button>
+          <td class="action-cell">
+            <button
+              class="copy-btn"
+              onclick="copyRecord(${item.id})"
+              title="複製"
+            >
+              📋
+            </button>
+          
+            <button
+              class="delete-btn"
+              onclick="deleteRecord(${item.id})"
+              title="刪除"
+            >
+              ✕
+            </button>
           </td>
         `;
 
