@@ -320,15 +320,17 @@
       <table>
         <thead>
           <tr>
-            <th>時間</th>
+            <th>序</th>
             <th>等級</th>
             <th>HP</th>
             <th>MP</th>
             <th>攻擊</th>
             <th>防禦</th>
             <th>速度</th>
-            <th>天賦<br>綜合值</th>
-            <th></th>
+            <th>天賦綜合值</th>
+            <th>時間</th>
+            <th>複製</th>
+            <th>刪除</th>
           </tr>
         </thead>
         <tbody id="history"></tbody>
@@ -436,26 +438,42 @@
         .sort((a, b) => b.diff - a.diff)
         .slice(0, 3);
 
-      historyData.forEach(item => {
+      historyData.forEach((item,index) => {
         const tr = document.createElement("tr");
         if (top3.includes(item)) tr.classList.add("top3");
 
         const sign = item.diff >= 0 ? "+" : "";
 
         tr.innerHTML = `
-          <td>${item.timeText || item.time || "-"}</td>
-          <td class="level-edit" onclick="editGrade(${item.id})">${item.grade || "-"}</td>
+          <td>${index + 1}</td>
+        
+          <td class="level-edit"
+              onclick="editGrade(${item.id})">
+              ${item.grade || "-"}
+          </td>
+        
           <td>${item.hp}</td>
           <td>${item.mp}</td>
           <td>${item.atk}</td>
           <td>${item.def}</td>
           <td>${item.spd}</td>
+        
           <td>${sign}${item.diff}</td>
+        
+          <td>${item.timeText || "-"}</td>
+        
           <td class="action-cell">
-            <div class="row-actions">
-              <button class="icon-btn copy-btn" onclick="copyShareUrl(${item.id})" title="複製分享網址">📋</button>
-              <button class="icon-btn del-btn" onclick="deleteRecord(${item.id})" title="刪除">✕</button>
-            </div>
+            <button class="icon-btn copy-btn"
+              onclick="copyShareUrl(${item.id})">
+              📋
+            </button>
+          </td>
+        
+          <td class="action-cell">
+            <button class="icon-btn del-btn"
+              onclick="deleteRecord(${item.id})">
+              ✕
+            </button>
           </td>
         `;
 
