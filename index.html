@@ -8,7 +8,7 @@
     body {
       font-family: Arial, "Microsoft JhengHei", sans-serif;
       padding: 20px;
-      max-width: 520px;
+      max-width: 620px;
       margin: auto;
       background: #f7f7f7;
     }
@@ -42,23 +42,51 @@
     }
 
     button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .main-btn {
       width: 100%;
       margin-top: 16px;
       padding: 12px;
       font-size: 18px;
-      border: none;
-      border-radius: 8px;
       background: #333;
       color: white;
-      cursor: pointer;
-      font-weight: bold;
+    }
+
+    .danger-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      font-size: 16px;
+      background: #b00020;
+      color: white;
+    }
+
+    .error-btn {
+      padding: 6px 8px;
+      font-size: 12px;
+      background: #ff9800;
+      color: white;
+    }
+
+    .error-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
     }
 
     .result {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: bold;
       text-align: center;
       margin-top: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
     }
 
     table {
@@ -66,12 +94,14 @@
       border-collapse: collapse;
       background: white;
       font-size: 14px;
+      min-width: 680px;
     }
 
     th, td {
       padding: 8px;
       border-bottom: 1px solid #ddd;
       text-align: center;
+      white-space: nowrap;
     }
 
     .top3 {
@@ -100,26 +130,33 @@
     <label>速度</label>
     <input type="number" id="spd" placeholder="請輸入速度">
 
-    <button onclick="calculate()">計算</button>
+    <button class="main-btn" onclick="calculate()">計算</button>
 
     <div class="result" id="result">尚未計算</div>
   </div>
 
   <div class="card">
     <h2>歷史紀錄</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>結果</th>
-          <th>HP</th>
-          <th>MP</th>
-          <th>攻擊</th>
-          <th>防禦</th>
-          <th>速度</th>
-        </tr>
-      </thead>
-      <tbody id="history"></tbody>
-    </table>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>時間</th>
+            <th>結果</th>
+            <th>HP</th>
+            <th>MP</th>
+            <th>攻擊</th>
+            <th>防禦</th>
+            <th>速度</th>
+            <th>錯誤回報</th>
+          </tr>
+        </thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+
+    <button class="danger-btn" onclick="keepTop3Only()">只保留最好的3筆，其他刪除</button>
   </div>
 
   <script>
@@ -132,6 +169,15 @@
     };
 
     let historyData = JSON.parse(localStorage.getItem("historyData")) || [];
+
+    function getTimeText() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, "0");
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      return `${day} ${hour}:${minute}:${second}`;
+    }
 
     function calculate() {
       const data = {
@@ -176,20 +222,69 @@
       document.getElementById("result").textContent = resultText;
 
       historyData.unshift({
+        id: Date.now(),
+        timeText: getTimeText(),
         ...data,
         diff,
-        resultText
+        resultText,
+        errorReported: false
       });
 
-      localStorage.setItem("historyData", JSON.stringify(historyData));
+      saveHistory();
+      renderHistory();
+      clearInputs();
+    }
 
+    function submitError(id) {
+      const item = historyData.find(x => x.id === id);
+
+      if (!item) return;
+
+      const confirmSubmit = confirm(
+        `確認提交計算錯誤？\n\n結果：${item.resultText}\nHP：${item.hp}\nMP：${item.mp}\n攻擊：${item.atk}\n防禦：${item.def}\n速度：${item.spd}`
+      );
+
+      if (!confirmSubmit) return;
+
+      item.errorReported = true;
+
+      let errorReports = JSON.parse(localStorage.getItem("errorReports")) || [];
+      errorReports.push({
+        reportTime: new Date().toLocaleString(),
+        ...item
+      });
+
+      localStorage.setItem("errorReports", JSON.stringify(errorReports));
+
+      saveHistory();
       renderHistory();
 
+      alert("已提交計算錯誤紀錄");
+    }
+
+    function keepTop3Only() {
+      if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) {
+        return;
+      }
+
+      historyData = [...historyData]
+        .sort((a, b) => b.diff - a.diff)
+        .slice(0, 3);
+
+      saveHistory();
+      renderHistory();
+    }
+
+    function clearInputs() {
       document.getElementById("hp").value = "";
       document.getElementById("mp").value = "";
       document.getElementById("atk").value = "";
       document.getElementById("def").value = "";
       document.getElementById("spd").value = "";
+    }
+
+    function saveHistory() {
+      localStorage.setItem("historyData", JSON.stringify(historyData));
     }
 
     function renderHistory() {
@@ -207,12 +302,22 @@
         if (isTop3) tr.classList.add("top3");
 
         tr.innerHTML = `
+          <td>${item.timeText || "-"}</td>
           <td>${item.resultText}</td>
           <td>${item.hp}</td>
           <td>${item.mp}</td>
           <td>${item.atk}</td>
           <td>${item.def}</td>
           <td>${item.spd}</td>
+          <td>
+            <button
+              class="error-btn"
+              onclick="submitError(${item.id})"
+              ${item.errorReported ? "disabled" : ""}
+            >
+              ${item.errorReported ? "已提交" : "提交計算錯誤"}
+            </button>
+          </td>
         `;
 
         tbody.appendChild(tr);
