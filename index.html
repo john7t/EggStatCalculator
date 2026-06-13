@@ -1,190 +1,547 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>神獸天賦能力值計算</title>
-<style>
-body{font-family:Arial,"Microsoft JhengHei",sans-serif;padding:20px;max-width:760px;margin:auto;background:#f7f7f7}
-.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:16px}
-h1{text-align:center}
-input{width:100%;padding:10px;margin-top:4px;box-sizing:border-box;border:1px solid #ddd;border-radius:8px}
-label{display:block;margin-top:10px;font-weight:bold}
-.main-btn{width:100%;padding:12px;margin-top:16px;background:#333;color:#fff;border:none;border-radius:8px}
-.result{font-size:28px;font-weight:bold;text-align:center;margin-top:16px}
-table{width:100%;border-collapse:collapse;background:#fff}
-th,td{padding:8px;text-align:center;border-bottom:1px solid #ddd}
-.top3{background:#fff3a3;font-weight:bold}
-.action-cell{opacity:0;transition:.2s}
-tr:hover .action-cell{opacity:1}
-@media(max-width:768px){.action-cell{opacity:1}}
-.icon-btn{border:none;border-radius:6px;padding:4px 8px;cursor:pointer}
-.copy-btn{background:#ff9800;color:white}
-.del-btn{background:#d32f2f;color:white}
-.actions{display:flex;gap:10px;margin-top:16px}
-.actions button{flex:1;padding:12px;border:none;border-radius:8px;color:white;cursor:pointer}
-.keep{background:#b00020}
-.clear{background:#666}
-.note{margin-top:12px;font-size:13px;color:#666;text-align:center}
-.level-edit{cursor:pointer;color:#1976d2}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神獸天賦能力值計算</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      padding: 16px;
+      max-width: 760px;
+      margin: auto;
+      background: #f7f7f7;
+      color: #111;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin: 16px 0 20px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #fff;
+    }
+
+    .inline-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .inline-field label {
+      margin: 0;
+      width: 52px;
+      flex: 0 0 52px;
+    }
+
+    .inline-field input {
+      flex: 1;
+    }
+
+    .main-btn {
+      width: 100%;
+      padding: 13px;
+      margin-top: 16px;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .main-btn:active {
+      transform: scale(.99);
+    }
+
+    .result {
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 18px;
+      word-break: break-word;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 14px;
+      table-layout: fixed;
+      min-width: 620px;
+    }
+
+    th, td {
+      padding: 9px 6px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 74px; }
+    th:nth-child(2), td:nth-child(2) { width: 54px; }
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(4), td:nth-child(4),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7) { width: 48px; }
+    th:nth-child(8), td:nth-child(8) { width: 86px; }
+    th:nth-child(9), td:nth-child(9) { width: 86px; }
+
+    .top3 {
+      background: #fff3a3;
+      font-weight: bold;
+    }
+
+    .level-edit {
+      cursor: pointer;
+      color: #1976d2;
+      font-weight: bold;
+    }
+
+    .action-cell {
+      opacity: 0;
+      transition: .2s;
+    }
+
+    tr:hover .action-cell {
+      opacity: 1;
+    }
+
+    .row-actions {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #fff;
+      line-height: 30px;
+      padding: 0;
+    }
+
+    .copy-btn {
+      background: #ff9800;
+    }
+
+    .del-btn {
+      background: #d32f2f;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .actions button {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 8px;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .keep {
+      background: #b00020;
+    }
+
+    .clear {
+      background: #666;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+        max-width: 100%;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 14px;
+        border-radius: 12px;
+      }
+
+      .result {
+        font-size: 26px;
+      }
+
+      .action-cell {
+        opacity: 1;
+      }
+
+      table {
+        min-width: 600px;
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 8px 5px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .inline-field label {
+        width: 46px;
+        flex-basis: 46px;
+      }
+
+      .actions {
+        gap: 8px;
+      }
+
+      .actions button {
+        font-size: 14px;
+        padding: 11px 6px;
+      }
+
+      .note {
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<h1>神獸天賦能力值計算</h1>
+  <h1>神獸天賦能力值計算</h1>
 
-<div class="card">
-<label>等級</label>
-<input type="text" id="grade" placeholder="可省略">
+  <div class="card">
+    <div class="inline-field">
+      <label for="grade">等級</label>
+      <input type="text" id="grade" placeholder="可省略">
+    </div>
 
-<label>HP</label>
-<input type="number" id="hp">
+    <label for="hp">HP</label>
+    <input type="number" id="hp" inputmode="numeric">
 
-<label>MP</label>
-<input type="number" id="mp">
+    <label for="mp">MP</label>
+    <input type="number" id="mp" inputmode="numeric">
 
-<label>攻擊</label>
-<input type="number" id="atk">
+    <label for="atk">攻擊</label>
+    <input type="number" id="atk" inputmode="numeric">
 
-<label>防禦</label>
-<input type="number" id="def">
+    <label for="def">防禦</label>
+    <input type="number" id="def" inputmode="numeric">
 
-<label>速度</label>
-<input type="number" id="spd">
+    <label for="spd">速度</label>
+    <input type="number" id="spd" inputmode="numeric">
 
-<button class="main-btn" onclick="calculate()">計算</button>
+    <button class="main-btn" onclick="calculate()">計算</button>
 
-<div class="result" id="result">尚未計算</div>
-</div>
+    <div class="result" id="result">尚未計算</div>
+  </div>
 
-<div class="card">
-<table>
-<thead>
-<tr>
-<th>時間</th>
-<th>等級</th>
-<th>HP</th>
-<th>MP</th>
-<th>攻擊</th>
-<th>防禦</th>
-<th>速度</th>
-<th>天賦綜合值</th>
-<th></th>
-</tr>
-</thead>
-<tbody id="history"></tbody>
-</table>
+  <div class="card">
+    <h2>歷史紀錄</h2>
 
-<div class="actions">
-<button class="keep" onclick="keepTop3Only()">保留最好的3筆</button>
-<button class="clear" onclick="clearAllHistory()">全數刪除</button>
-</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>時間</th>
+            <th>等級</th>
+            <th>HP</th>
+            <th>MP</th>
+            <th>攻擊</th>
+            <th>防禦</th>
+            <th>速度</th>
+            <th>天賦<br>綜合值</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
 
-<div class="note">
-提醒：本資料僅存在本機瀏覽器的暫存資料中，並不會傳送資料。
-</div>
-</div>
+    <div class="actions">
+      <button class="keep" onclick="keepTop3Only()">保留最好的3筆</button>
+      <button class="clear" onclick="clearAllHistory()">全數刪除</button>
+    </div>
 
-<script>
-const base={hp:104,mp:32,atk:16,def:13,spd:11};
-let historyData=JSON.parse(localStorage.getItem("historyData"))||[];
+    <div class="note">
+      提醒：本資料僅存在本機瀏覽器的暫存資料中，並不會傳送資料。
+    </div>
+  </div>
 
-function save(){localStorage.setItem("historyData",JSON.stringify(historyData));}
+  <script>
+    const base = {
+      hp: 104,
+      mp: 32,
+      atk: 16,
+      def: 13,
+      spd: 11
+    };
 
-function calculate(){
-const grade=document.getElementById("grade").value.trim();
-const hp=Number(document.getElementById("hp").value);
-const mp=Number(document.getElementById("mp").value);
-const atk=Number(document.getElementById("atk").value);
-const def=Number(document.getElementById("def").value);
-const spd=Number(document.getElementById("spd").value);
+    let historyData = JSON.parse(localStorage.getItem("historyData")) || [];
 
-if([hp,mp,atk,def,spd].some(v=>Number.isNaN(v)||v==="")){
-alert("請輸入所有能力值");
-return;
-}
+    function save() {
+      localStorage.setItem("historyData", JSON.stringify(historyData));
+    }
 
-const diff=(hp-base.hp)+(mp-base.mp)+(atk-base.atk)+(def-base.def)+(spd-base.spd);
-const sign=diff>=0?"+":"";
+    function getTimeText() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, "0");
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+      return `${day} ${hour}:${minute}:${second}`;
+    }
 
-historyData.unshift({
-id:Date.now(),
-time:new Date().toLocaleTimeString("zh-TW",{hour12:false}),
-grade,
-hp,mp,atk,def,spd,
-diff
-});
+    function getInputNumber(id) {
+      return Number(document.getElementById(id).value);
+    }
 
-save();
-render();
+    function isEmpty(id) {
+      return document.getElementById(id).value === "";
+    }
 
-document.getElementById("result").textContent="天賦綜合值："+sign+diff;
-["grade","hp","mp","atk","def","spd"].forEach(id=>document.getElementById(id).value="");
-}
+    function calculate() {
+      const grade = document.getElementById("grade").value.trim();
 
-function render(){
-const tbody=document.getElementById("history");
-tbody.innerHTML="";
+      if (
+        isEmpty("hp") ||
+        isEmpty("mp") ||
+        isEmpty("atk") ||
+        isEmpty("def") ||
+        isEmpty("spd")
+      ) {
+        alert("請輸入所有能力值");
+        return;
+      }
 
-const top3=[...historyData].sort((a,b)=>b.diff-a.diff).slice(0,3);
+      const data = {
+        hp: getInputNumber("hp"),
+        mp: getInputNumber("mp"),
+        atk: getInputNumber("atk"),
+        def: getInputNumber("def"),
+        spd: getInputNumber("spd")
+      };
 
-historyData.forEach(item=>{
-const tr=document.createElement("tr");
-if(top3.includes(item)) tr.classList.add("top3");
+      const diff =
+        (data.hp - base.hp) +
+        (data.mp - base.mp) +
+        (data.atk - base.atk) +
+        (data.def - base.def) +
+        (data.spd - base.spd);
 
-const sign=item.diff>=0?"+":"";
+      const sign = diff >= 0 ? "+" : "";
+      document.getElementById("result").textContent = `天賦綜合值：${sign}${diff}`;
 
-tr.innerHTML=`
-<td>${item.time}</td>
-<td class="level-edit" onclick="editGrade(${item.id})">${item.grade||"-"}</td>
-<td>${item.hp}</td>
-<td>${item.mp}</td>
-<td>${item.atk}</td>
-<td>${item.def}</td>
-<td>${item.spd}</td>
-<td>${sign}${item.diff}</td>
-<td class="action-cell">
-<button class="icon-btn copy-btn" onclick="copyRecord(${item.id})">📋</button>
-<button class="icon-btn del-btn" onclick="deleteRecord(${item.id})">✕</button>
-</td>`;
-tbody.appendChild(tr);
-});
-}
+      historyData.unshift({
+        id: Date.now(),
+        timeText: getTimeText(),
+        grade,
+        ...data,
+        diff
+      });
 
-function editGrade(id){
-const item=historyData.find(x=>x.id===id);
-const value=prompt("請輸入等級",item.grade||"");
-if(value===null)return;
-item.grade=value;
-save();
-render();
-}
+      save();
+      render();
+      clearInputs();
+    }
 
-function copyRecord(id){
-const item=historyData.find(x=>x.id===id);
-navigator.clipboard.writeText(JSON.stringify(item));
-alert("已複製");
-}
+    function clearInputs() {
+      ["grade", "hp", "mp", "atk", "def", "spd"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+    }
 
-function deleteRecord(id){
-historyData=historyData.filter(x=>x.id!==id);
-save();render();
-}
+    function render() {
+      const tbody = document.getElementById("history");
+      tbody.innerHTML = "";
 
-function keepTop3Only(){
-historyData=[...historyData].sort((a,b)=>b.diff-a.diff).slice(0,3);
-save();render();
-}
+      const top3 = [...historyData]
+        .sort((a, b) => b.diff - a.diff)
+        .slice(0, 3);
 
-function clearAllHistory(){
-if(confirm("確定刪除全部紀錄？")){
-historyData=[];
-localStorage.removeItem("historyData");
-render();
-}
-}
+      historyData.forEach(item => {
+        const tr = document.createElement("tr");
+        if (top3.includes(item)) tr.classList.add("top3");
 
-render();
-</script>
+        const sign = item.diff >= 0 ? "+" : "";
+
+        tr.innerHTML = `
+          <td>${item.timeText || item.time || "-"}</td>
+          <td class="level-edit" onclick="editGrade(${item.id})">${item.grade || "-"}</td>
+          <td>${item.hp}</td>
+          <td>${item.mp}</td>
+          <td>${item.atk}</td>
+          <td>${item.def}</td>
+          <td>${item.spd}</td>
+          <td>${sign}${item.diff}</td>
+          <td class="action-cell">
+            <div class="row-actions">
+              <button class="icon-btn copy-btn" onclick="copyShareUrl(${item.id})" title="複製分享網址">📋</button>
+              <button class="icon-btn del-btn" onclick="deleteRecord(${item.id})" title="刪除">✕</button>
+            </div>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editGrade(id) {
+      const item = historyData.find(x => x.id === id);
+      if (!item) return;
+
+      const value = prompt("請輸入等級", item.grade || "");
+      if (value === null) return;
+
+      item.grade = value.trim();
+      save();
+      render();
+    }
+
+    function copyShareUrl(id) {
+      const item = historyData.find(x => x.id === id);
+      if (!item) return;
+
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set("grade", item.grade || "");
+      url.searchParams.set("hp", item.hp);
+      url.searchParams.set("mp", item.mp);
+      url.searchParams.set("atk", item.atk);
+      url.searchParams.set("def", item.def);
+      url.searchParams.set("spd", item.spd);
+      url.searchParams.set("diff", item.diff);
+
+      const text = url.toString();
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => alert("已複製分享網址"))
+          .catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      prompt("請手動複製這個分享網址", text);
+    }
+
+    function deleteRecord(id) {
+      if (!confirm("確定刪除這筆紀錄？")) return;
+
+      historyData = historyData.filter(x => x.id !== id);
+      save();
+      render();
+    }
+
+    function keepTop3Only() {
+      if (!confirm("確定只保留最好的3筆？其他紀錄會刪除。")) return;
+
+      historyData = [...historyData]
+        .sort((a, b) => b.diff - a.diff)
+        .slice(0, 3);
+
+      save();
+      render();
+    }
+
+    function clearAllHistory() {
+      if (!confirm("確定刪除全部紀錄？")) return;
+
+      historyData = [];
+      localStorage.removeItem("historyData");
+      render();
+    }
+
+    function loadFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("hp")) return;
+
+      document.getElementById("grade").value = params.get("grade") || "";
+      document.getElementById("hp").value = params.get("hp") || "";
+      document.getElementById("mp").value = params.get("mp") || "";
+      document.getElementById("atk").value = params.get("atk") || "";
+      document.getElementById("def").value = params.get("def") || "";
+      document.getElementById("spd").value = params.get("spd") || "";
+
+      const diff = params.get("diff");
+      if (diff !== null && diff !== "") {
+        const n = Number(diff);
+        const sign = n >= 0 ? "+" : "";
+        document.getElementById("result").textContent = `天賦綜合值：${sign}${n}`;
+      }
+    }
+
+    loadFromUrl();
+    render();
+  </script>
+
 </body>
 </html>
